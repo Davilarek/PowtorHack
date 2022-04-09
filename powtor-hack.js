@@ -62,6 +62,12 @@ apiRequest.onreadystatechange = function () {
 
 				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
 
+				// remove all spaces from question.textContent and parsedQuestionData.textContent
+				question.textContent = question.textContent.replace(/\s/g, "");
+				parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\s/g, "");
+
+				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
+
 				if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
 					console.log("Odnaleziono odpowiedź. ");
 					console.log(apiResponse[questionIndex].items);
