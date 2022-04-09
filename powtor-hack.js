@@ -47,6 +47,8 @@ apiRequest.onreadystatechange = function () {
 					questionInfo = apiResponse[questionIndex].instruction;
 				if ("question" in apiResponse[questionIndex])
 					questionInfo = apiResponse[questionIndex].question;
+				if ("question" in apiResponse[questionIndex].items[0])
+					questionInfo = apiResponse[questionIndex].question;
 
 				var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
 
