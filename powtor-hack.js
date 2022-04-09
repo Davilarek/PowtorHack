@@ -40,9 +40,10 @@ xhr.onreadystatechange = function() {
 			}
 			for (var i2 = 0; i2 < resp.length; i2++) {
 				var instr = ""
-				if (resp[i2]["instruction"])
+				//console.log("instruction" in resp[i2])
+				if ("instruction" in resp[i2])
 					instr = resp[i2].instruction;
-				if (resp[i2]["question"])
+				if ("question" in resp[i2])
 					instr = resp[i2].question;
 				
 				var doc = new DOMParser().parseFromString(instr, "text/html").documentElement;
