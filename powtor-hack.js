@@ -50,6 +50,7 @@ xhr.onreadystatechange = function() {
 
 				var myspan = myspans[i].childNodes[0];
 				if (myspan.textContent == doc.textContent) {
+					console.log("Odnaleziono odpowiedź. ");
 					console.log(resp[i2].items);
 					return;
 					break;
