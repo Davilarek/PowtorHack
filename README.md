@@ -11,3 +11,4 @@ fetch("https://raw.githubusercontent.com/Davilarek/PowtorHack/main/powtor-hack.j
 .then((res) => res.text()
 .then((t) => eval(t)))
 ```
+Uwaga. Zbyt częste wysyłanie prośby do serwera o listę odpowiedzi może opóźnić połączenie lub nawet je zablokować. Używasz na własną odpowiedzialność.
