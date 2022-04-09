@@ -50,11 +50,16 @@ apiRequest.onreadystatechange = function () {
 
 				var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
 
-				
-
 				var question = questionData[questionElements].childNodes[0];
 				// remove \\frac{ and }{ and } from question.textContent
 				parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
+
+				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
+
+				// remove all newlines and carriage return from question.textContent and parsedQuestionData.textContent
+				question.textContent = question.textContent.replace(/\n/g, "").replace(/\r/g, "");
+				parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\n/g, "").replace(/\r/g, "");
+
 				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
 
 				if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
