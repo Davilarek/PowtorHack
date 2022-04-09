@@ -3,65 +3,64 @@ console.log("Informacje i zgłaszanie błędów: https://github.com/Davilarek/Po
 
 var open = window.XMLHttpRequest.prototype.open;
 
-var exeUrl = "";
+var questionApiUrl = "";
 
 function openReplacement(method, url, async, user, password) {
 	this._url = url;
-	exeUrl = arguments[1];
+	questionApiUrl = arguments[1];
 	return open.apply(this, arguments);
 }
 window.XMLHttpRequest.prototype.open = openReplacement;
 
 document.getElementsByClassName("indicator exercise-mode ng-star-inserted")[0].parentElement.childNodes[0].click()
 
-var xhr = new XMLHttpRequest();
-xhr.open("GET", exeUrl);
+var apiRequest = new XMLHttpRequest();
+apiRequest.open("GET", questionApiUrl);
 var header1 = document.getElementsByClassName("content screen-exercises")[0].ownerDocument.cookie.split("; ")[0].split("=")
 var header2 = document.getElementsByClassName("content screen-exercises")[0].ownerDocument.cookie.split("; ")[1].split("=")
 
 window.XMLHttpRequest.prototype.open = open;
 
-xhr.setRequestHeader("X-Authorization", header1[1]);
-xhr.setRequestHeader("japa_phpsessid", header2[1]);
+apiRequest.setRequestHeader("X-Authorization", header1[1]);
+apiRequest.setRequestHeader("japa_phpsessid", header2[1]);
 
-var arr = ['instruction', 'question'];
+var questionClassNames = ['instruction', 'question'];
 
-xhr.onreadystatechange = function () {
-	if (xhr.readyState === 4) {
-		let resp = JSON.parse(xhr.responseText).pool
+apiRequest.onreadystatechange = function () {
+	if (apiRequest.readyState === 4) {
+		let apiResponse = JSON.parse(apiRequest.responseText).pool
 		var questionData = document.getElementsByTagName("app-exercise-loader")[0].getElementsByClassName("ng-star-inserted");
 		for (var i = 0; i < questionData.length; i++) {
-			const contains = arr.some(element => {
+			const contains = questionClassNames.some(element => {
 				if (questionData[i].className.indexOf(element) !== -1) {
 					return true;
 				}
-
 				return false;
 			});
 			if (!contains) {
 				continue;
 			}
-			for (var i2 = 0; i2 < resp.length; i2++) {
-				var instr = ""
+			for (var i2 = 0; i2 < apiResponse.length; i2++) {
+				var questionInfo = ""
 				//console.log("instruction" in resp[i2])
-				if ("instruction" in resp[i2])
-					instr = resp[i2].instruction;
-				if ("question" in resp[i2])
-					instr = resp[i2].question;
+				if ("instruction" in apiResponse[i2])
+					questionInfo = apiResponse[i2].instruction;
+				if ("question" in apiResponse[i2])
+					questionInfo = apiResponse[i2].question;
 
-				var doc = new DOMParser().parseFromString(instr, "text/html").documentElement;
+				var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
 
 				var question = questionData[i].childNodes[0];
-				if (question.textContent == doc.textContent) {
+				if (question.textContent == parsedQuestionData.textContent) {
 					console.log("Odnaleziono odpowiedź. ");
-					console.log(resp[i2].items);
+					console.log(apiResponse[i2].items);
 					return;
 					break;
 				}
 			}
 		}
 		console.log("UWAGA! Nie odnaleziono odpowiedzi. Możesz spróbować odnaleźć je ręcznie. ");
-		console.log(resp);
+		console.log(apiResponse);
 	}
 };
-xhr.send();
+apiRequest.send();
