@@ -63,8 +63,8 @@ apiRequest.onreadystatechange = function () {
 				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
 
 				// remove all spaces from question.textContent and parsedQuestionData.textContent
-				question.textContent = question.textContent.replace(/\s/g, "");
-				parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\s/g, "");
+				question.textContent = question.textContent.replaceAll(' ','');
+				parsedQuestionData.textContent = parsedQuestionData.textContent.replaceAll(' ','');
 
 				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
 
