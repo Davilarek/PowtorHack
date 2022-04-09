@@ -63,8 +63,8 @@ apiRequest.onreadystatechange = function () {
 				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
 
 				// replace ' ' with '' globally in question.textContent and parsedQuestionData.textContent
-				question.textContent = question.textContent.replace(/ /g, "");
-				parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/ /g, "");
+				question.textContent = question.textContent.replace(/ /gm, "");
+				parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/ /gm, "");
 
 				// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
 
