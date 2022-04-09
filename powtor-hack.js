@@ -26,13 +26,13 @@ xhr.setRequestHeader("japa_phpsessid", header2[1]);
 
 var arr = ['instruction', 'question'];
 
-xhr.onreadystatechange = function() {
+xhr.onreadystatechange = function () {
 	if (xhr.readyState === 4) {
 		let resp = JSON.parse(xhr.responseText).pool
-		var myspans = document.getElementsByTagName("app-exercise-loader")[0].getElementsByClassName("ng-star-inserted");
-		for (var i = 0; i < myspans.length; i++) {
+		var questionData = document.getElementsByTagName("app-exercise-loader")[0].getElementsByClassName("ng-star-inserted");
+		for (var i = 0; i < questionData.length; i++) {
 			const contains = arr.some(element => {
-				if (myspans[i].className.indexOf(element) !== -1) {
+				if (questionData[i].className.indexOf(element) !== -1) {
 					return true;
 				}
 
@@ -48,11 +48,11 @@ xhr.onreadystatechange = function() {
 					instr = resp[i2].instruction;
 				if ("question" in resp[i2])
 					instr = resp[i2].question;
-				
+
 				var doc = new DOMParser().parseFromString(instr, "text/html").documentElement;
 
-				var myspan = myspans[i].childNodes[0];
-				if (myspan.textContent == doc.textContent) {
+				var question = questionData[i].childNodes[0];
+				if (question.textContent == doc.textContent) {
 					console.log("Odnaleziono odpowiedź. ");
 					console.log(resp[i2].items);
 					return;
