@@ -3,6 +3,7 @@
 Cheat do PowtórkoMatu 8.
 
 Uwaga. Nie wszystkie typy pytań są wspierane. Mimo to i tak otrzymasz odpowiedzi.
+Np. zadania, które nie zmieniają swojego pytania nie działają prawidłowo, między innymi prawda/fałsz. 
 
 # Użycie
 
