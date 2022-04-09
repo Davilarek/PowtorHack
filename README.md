@@ -7,7 +7,7 @@ Np. zadania, które nie zmieniają swojego pytania nie działają prawidłowo, m
 
 # Użycie
 
-Ctrl + Shift + I > Konsola > Wklej kod znajdujący się poniżej \\/ > Enter > Powtórz na każdym pytaniu
+Otwórz zadanie (Ćwiczenia powtórzeniowe, Testy nie są aktualnie wspierane) (np Powtórka 1, zadanie 2) > Ctrl + Shift + I > Konsola > Wklej kod znajdujący się poniżej \\/ > Enter > Powtórz na każdym pytaniu
 
 ```
 fetch("https://raw.githubusercontent.com/Davilarek/PowtorHack/main/powtor-hack.js")
