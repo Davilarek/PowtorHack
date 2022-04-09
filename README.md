@@ -6,7 +6,7 @@ Uwaga. Nie wszystkie typy pytań są wspierane. Mimo to i tak otrzymasz odpowied
 
 # Użycie
 
-Ctrl + Shift + I > Konsola > Wklej skrypt znajdujący się poniżej \\/ > Enter > Powtórz na każdym pytaniu
+Ctrl + Shift + I > Konsola > Wklej kod znajdujący się poniżej \\/ > Enter > Powtórz na każdym pytaniu
 
 ```
 fetch("https://raw.githubusercontent.com/Davilarek/PowtorHack/main/powtor-hack.js")
