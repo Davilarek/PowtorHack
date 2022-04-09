@@ -2,9 +2,11 @@
 
 Cheat do PowtórkoMatu 8.
 
+Uwaga. Nie wszystkie typy pytań są wspierane. Mimo to i tak otrzymasz odpowiedzi.
+
 # Użycie
 
-Ctrl + Shift + I > Konsola > Wklej skrypt znajdujący się poniżej \/ > Enter > Powtórz na każdym pytaniu
+Ctrl + Shift + I > Konsola > Wklej skrypt znajdujący się poniżej \\/ > Enter > Powtórz na każdym pytaniu
 
 ```
 fetch("https://raw.githubusercontent.com/Davilarek/PowtorHack/main/powtor-hack.js")
