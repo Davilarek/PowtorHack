@@ -30,32 +30,31 @@ apiRequest.onreadystatechange = function () {
 	if (apiRequest.readyState === 4) {
 		let apiResponse = JSON.parse(apiRequest.responseText).pool
 		var questionData = document.getElementsByTagName("app-exercise-loader")[0].getElementsByClassName("ng-star-inserted");
-		for (var i = 0; i < questionData.length; i++) {
-			const contains = questionClassNames.some(element => {
-				if (questionData[i].className.indexOf(element) !== -1) {
+		for (var questionElements = 0; questionElements < questionData.length; questionElements++) {
+			const questionDataContainsClass = questionClassNames.some(element => {
+				if (questionData[questionElements].className.indexOf(element) !== -1) {
 					return true;
 				}
 				return false;
 			});
-			if (!contains) {
+			if (!questionDataContainsClass) {
 				continue;
 			}
-			for (var i2 = 0; i2 < apiResponse.length; i2++) {
+			for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
 				var questionInfo = ""
 				//console.log("instruction" in resp[i2])
-				if ("instruction" in apiResponse[i2])
-					questionInfo = apiResponse[i2].instruction;
-				if ("question" in apiResponse[i2])
-					questionInfo = apiResponse[i2].question;
+				if ("instruction" in apiResponse[questionIndex])
+					questionInfo = apiResponse[questionIndex].instruction;
+				if ("question" in apiResponse[questionIndex])
+					questionInfo = apiResponse[questionIndex].question;
 
 				var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
 
-				var question = questionData[i].childNodes[0];
+				var question = questionData[questionElements].childNodes[0];
 				if (question.textContent == parsedQuestionData.textContent) {
 					console.log("Odnaleziono odpowiedź. ");
-					console.log(apiResponse[i2].items);
+					console.log(apiResponse[questionIndex].items);
 					return;
-					break;
 				}
 			}
 		}
