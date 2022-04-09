@@ -1,3 +1,6 @@
+console.log("Cheat uruchamia się...");
+console.log("Informacje i zgłaszanie błędów: https://github.com/Davilarek/PowtorHack");
+
 var open = window.XMLHttpRequest.prototype.open;
 
 var exeUrl = "";
