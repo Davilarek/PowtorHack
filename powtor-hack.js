@@ -41,7 +41,7 @@ apiRequest.onreadystatechange = function () {
 				continue;
 			}
 			for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
-				var questionInfo = ""
+				var questionInfo = "";
 				//console.log("instruction" in resp[i2])
 				if ("instruction" in apiResponse[questionIndex])
 					questionInfo = apiResponse[questionIndex].instruction;
@@ -51,7 +51,7 @@ apiRequest.onreadystatechange = function () {
 				var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
 
 				var question = questionData[questionElements].childNodes[0];
-				if (question.textContent == parsedQuestionData.textContent) {
+				if (question.textContent.replace(/\n*$/, "") == parsedQuestionData.textContent.replace(/\n*$/, "")) {
 					console.log("Odnaleziono odpowiedź. ");
 					console.log(apiResponse[questionIndex].items);
 					return;
