@@ -20,7 +20,7 @@ function startCheat() {
 
 			var questionApiUrl = "";
 
-			function openReplacement(method, url, async, user, password) {
+			function openReplacement(method, url) {
 				this._url = url;
 				questionApiUrl = arguments[1];
 				return open.apply(this, arguments);
