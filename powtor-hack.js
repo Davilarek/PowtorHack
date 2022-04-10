@@ -96,8 +96,9 @@ function startCheat() {
 
 							var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
 
-							var question = questionData[questionElements].childNodes[0];
-							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + " question: " + question.textContent);
+							//var question = questionData[questionElements].childNodes[0];
+							var question = questionData[questionElements];
+							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
 							parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
 							question.textContent = question.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
 							parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
@@ -105,20 +106,20 @@ function startCheat() {
 
 							// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
 
-							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + " question: " + question.textContent);
+							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
 							// remove all newlines and carriage return from question.textContent and parsedQuestionData.textContent
 							question.textContent = question.textContent.replace(/\n/g, "").replace(/\r/g, "");
 							parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\n/g, "").replace(/\r/g, "");
 
 							// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
 
-							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + " question: " + question.textContent);
+							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
 							// replace ' ' with '' globally in question.textContent and parsedQuestionData.textContent
 							question.textContent = question.textContent.replace(/\s+/gm, '');
 							parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\s+/gm, '');
 
 							// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
-							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + " question: " + question.textContent);
+							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
 							// ostatnia część kodu. zamienia wszystkie znaki specjalne na ich odpowiedniki, upraszcza pytania do maksimum, a następnie porównuje dane z API z danymi ze strony. nie jest to dokładne rozwiązanie, ale czasem działa.
 							if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
 								console.log("Odnaleziono odpowiedź. ");
