@@ -11,14 +11,17 @@ console.log("Informacje i zgłaszanie błędów: https://github.com/Davilarek/Po
  * a następnie wyświetla odpowiedzi do konsoli.
  */
 function startCheat() {
+	var cheatStartTime = performance.now();
 	var githubApiUrl = "https://api.github.com/repos/Davilarek/PowtorHack/commits?sha=main&per_page=1&page=1";
 	var githubApiRequest = new XMLHttpRequest();
 	githubApiRequest.open("GET", githubApiUrl);
 	githubApiRequest.setRequestHeader("User-Agent", "request");
 	githubApiRequest.onreadystatechange = function () {
 		if (githubApiRequest.readyState === 4) {
-			let githubApiResponse = githubApiRequest.getResponseHeader("link");
-			console.log("%cPowtor Hack " + "%cv1." + githubApiResponse.split("https://api.github.com")[2].split("&")[2].split("=")[1].split(">")[0] + "%c by Davilarek", "color: red", "color: white", "color: red");
+			let githubApiResponse = githubApiRequest.getResponseHeader("link").split("https://api.github.com")[2].split("&")[2].split("=")[1].split(">")[0];
+			console.log("%cPowtor Hack " + "%cv1." + githubApiResponse + "%c by Davilarek", "color: red", "color: white", "color: red");
+
+			var answersGetTime = performance.now();
 
 			// check if url contains "https://powtorkomat8.apps.gwo.pl/practice-exercises/" and if it doesn't show console.log "Nie znaleziono powtórki"
 			if (!window.location.href.includes("https://powtorkomat8.apps.gwo.pl/practice-exercises/")) {
@@ -44,6 +47,7 @@ function startCheat() {
 
 			window.XMLHttpRequest.prototype.open = openReplacement;
 
+			// manualne odświeżenie strony z zadaniem, aby wystąpiło ponowne żądanie do API
 			document.getElementsByClassName("indicator exercise-mode ng-star-inserted")[0].parentElement.childNodes[0].click()
 
 			var apiRequest = new XMLHttpRequest();
@@ -69,7 +73,9 @@ function startCheat() {
 				if (apiRequest.readyState === 4) {
 					// przetwarzanie danych z odpowiedzi API pytania
 					// uwaga. można dodać sprawdzanie czy dane są poprawne
-					let apiResponse = JSON.parse(apiRequest.responseText).pool
+					let apiResponse = JSON.parse(apiRequest.responseText).pool;
+					// apiResponseRaw na ten moment jest potrzebne tylko do debugowania
+					let apiResponseRaw = JSON.parse(apiRequest.responseText);
 					var questionData = document.getElementsByTagName("app-exercise-loader")[0].getElementsByClassName("ng-star-inserted");
 					for (var questionElements = 0; questionElements < questionData.length; questionElements++) {
 
@@ -80,9 +86,11 @@ function startCheat() {
 							}
 							return false;
 						});
+
 						if (!questionDataContainsClass) {
 							continue;
 						}
+
 						for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
 							var questionInfo = "";
 
@@ -96,6 +104,7 @@ function startCheat() {
 
 							var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
 
+							// rozwiązanie w komentarzu poniżej \/ jest bezpieczniejsze, ale nie zawsze działa
 							//var question = questionData[questionElements].childNodes[0];
 							var question = questionData[questionElements];
 							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
@@ -119,19 +128,27 @@ function startCheat() {
 							parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\s+/gm, '');
 
 							// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
+
 							if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
+
 							// ostatnia część kodu. zamienia wszystkie znaki specjalne na ich odpowiedniki, upraszcza pytania do maksimum, a następnie porównuje dane z API z danymi ze strony. nie jest to dokładne rozwiązanie, ale czasem działa.
 							if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
 								console.log("Odnaleziono odpowiedź. ");
 								console.log(apiResponse[questionIndex].items);
+								if (window.powtorHackDebug) console.log(apiResponseRaw);
+								console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
+								console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
 								return;
 							}
 						}
 					}
 
 					// jeżeli wszystko zawiedzie, wyświetla surową odpowiedź API
-					console.log("UWAGA! Nie odnaleziono odpowiedzi. Możesz spróbować odnaleźć je ręcznie. ");
+					// uwaga. należy zwrócić uwagę na to, że apiResponseRaw nie jest tym samym co apiResponse. apiResponseRaw zawiera też informacje o typie zadania, ilości punktów, itp. nie koniecznie musi to interesować użytkownika.
+					console.log("UWAGA! Nie odnaleziono odpowiedzi. Możesz nadal spróbować odnaleźć je ręcznie. ");
 					console.log(apiResponse);
+					console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
+					console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
 				}
 			};
 			apiRequest.send();
