@@ -48,6 +48,30 @@ function startCheat() {
 	githubApiRequest.send();
 }
 
+Array.prototype.equals = function (array) {
+	// if the other array is a falsy value, return
+	if (!array)
+		return false;
+
+	// compare lengths - can save a lot of time 
+	if (this.length != array.length)
+		return false;
+
+	for (var i = 0, l = this.length; i < l; i++) {
+		// Check if we have nested arrays
+		if (this[i] instanceof Array && array[i] instanceof Array) {
+			// recurse into the nested arrays
+			if (!this[i].equals(array[i]))
+				return false;
+		}
+		else if (this[i] != array[i]) {
+			// Warning - two different object instances will never be equal: {x:20} != {x:20}
+			return false;
+		}
+	}
+	return true;
+}
+
 function practicesHack() {
 	var open = window.XMLHttpRequest.prototype.open;
 
@@ -118,7 +142,7 @@ function practicesHack() {
 }
 
 function hackAnswersUsingJSON(apiResponse, apiResponseRaw, questionData, questionElements) {
-	for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
+	mainFor: for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
 		var questionInfo = "";
 
 		// jest kilka typów zadań. te ify są potrzebne do znalezienia odpowiedniego typu zadania
@@ -158,23 +182,142 @@ function hackAnswersUsingJSON(apiResponse, apiResponseRaw, questionData, questio
 
 		if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
 
-		// ostatnia część kodu. zamienia wszystkie znaki specjalne na ich odpowiedniki, upraszcza pytania do maksimum, a następnie porównuje dane z API z danymi ze strony. nie jest to dokładne rozwiązanie, ale czasem działa.
-		if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
-			console.log("Odnaleziono odpowiedź. ");
-			console.log(apiResponse[questionIndex].items);
-			for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
-				const element = apiResponse[questionIndex].items[subQuestionIndex];
-				if (element.answer && element.values) {
-					var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
-					console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
+		var questionReady = question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-");
+		var parsedQuestionDataReady = parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-");
+
+		//console.log(question)
+
+		function s(x, y) {
+			var pre = ['string', 'number', 'bool']
+			if (typeof x !== typeof y) return pre.indexOf(typeof y) - pre.indexOf(typeof x);
+
+			if (x === y) return 0;
+			else return (x > y) ? 1 : -1;
+
+		}
+
+
+		if (question.parentElement.getElementsByClassName("values-abcd").length > 0 || (question.parentElement.getElementsByClassName("items-abcd")[0] && question.parentElement.getElementsByClassName("items-abcd")[0].getElementsByClassName("values-abcd").length > 0)) {
+			let answersData = null;
+			console.log("Próba uzyskania odpowiedzi za pomocą pytania...")
+			if (question.parentElement.getElementsByClassName("values-abcd").length > 0)
+				answersData = question.parentElement.getElementsByClassName("values-abcd")[0].children;
+			else
+				answersData = question.parentElement.getElementsByClassName("items-abcd")[0].getElementsByClassName("values-abcd")[0].children;
+			let alternativeAnswers = [];
+			for (let index = 0; index < answersData.length; index++) {
+				const element3 = answersData[index];
+				alternativeAnswers.push(element3.children[1].textContent);
+			}
+			alternativeAnswers = alternativeAnswers.map(function (x) {
+				return parseInt(x, 10);
+			});
+			let alternativeApiResponse = [];
+
+			//for (let i = 0; i < apiResponse.length; i++) {
+			//for (let j = 0; j < apiResponse[i].items[0].values.length; j++) {
+			for (let j = 0; j < apiResponse[questionIndex].items[0].values.length; j++) {
+				//var parsed = new DOMParser().parseFromString(apiResponse[i].items[0].values[j], "text/html").documentElement
+				var parsed = new DOMParser().parseFromString(apiResponse[questionIndex].items[0].values[j], "text/html").documentElement
+
+				parsed.textContent = parsed.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
+				parsed.textContent = parsed.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
+				parsed.textContent = parsed.textContent.replace(/\n/g, "").replace(/\r/g, "");
+				parsed.textContent = parsed.textContent.replace(/\s+/gm, '');
+				var parsedReady = parsed.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-");
+				alternativeApiResponse.push(parsedReady);
+			}
+			//}
+
+			const chunkSize = 4;
+			for (let i = 0; i < alternativeApiResponse.length; i += chunkSize) {
+				const chunk = alternativeApiResponse.slice(i, i + chunkSize).map(function (x) {
+					return parseInt(x, 10);
+				});
+
+				//console.log(chunk.sort(s));
+				//console.log(alternativeAnswers.sort(s))
+				if (alternativeAnswers.sort(s).equals(chunk.sort(s))) {
+					console.log("Odnaleziono odpowiedź po pytaniu.");
+					console.log(apiResponse[questionIndex].items);
+					for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
+						const element = apiResponse[questionIndex].items[subQuestionIndex];
+						if (element.answer && element.values) {
+							var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
+							console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
+						}
+					}
+					if (window.powtorHackDebug) console.log(apiResponseRaw);
+					console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
+					console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
+					success = true;
+					return;
 				}
 			}
-			if (window.powtorHackDebug) console.log(apiResponseRaw);
-			console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
-			console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
-			success = true;
-			return;
 		}
+		else
+
+
+			// ostatnia część kodu. zamienia wszystkie znaki specjalne na ich odpowiedniki, upraszcza pytania do maksimum, a następnie porównuje dane z API z danymi ze strony. nie jest to dokładne rozwiązanie, ale czasem działa.
+			if (questionReady.localeCompare(parsedQuestionDataReady) === 0) {
+
+
+
+				//console.log(alternativeApiResponse.sort(s))
+
+
+
+				// for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
+				// 	const element = apiResponse[questionIndex].items[subQuestionIndex];
+				// 	if (element.answer && element.values) {
+				// 		for (let index = 0; index < element.values.length; index++) {
+				// 			const element2 = element.values[index];
+				// 			const chunkSize = 4;
+				// 			for (let i = 0; i < document.getElementsByClassName("value-abcd").length; i += chunkSize) {
+				// 				const chunk = [].slice.call(document.getElementsByClassName("value-abcd")).slice(i, i + chunkSize);
+				// 				console.log(chunk[index])
+				// 				console.log(element2)
+				// 				if (chunk[index] == element2) {
+				// 					console.log("found")
+				// 				}
+				// 			}
+				// 		}
+				// 	}
+				// }
+
+				console.log("Odnaleziono odpowiedź. ");
+				console.log(apiResponse[questionIndex].items);
+				for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
+					const element = apiResponse[questionIndex].items[subQuestionIndex];
+					if (element.answer && element.values) {
+						var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
+						console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
+					}
+				}
+				if (window.powtorHackDebug) console.log(apiResponseRaw);
+				console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
+				console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
+				success = true;
+				return;
+			}
+		// else {
+		// 	for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
+		// 		const element = apiResponse[questionIndex].items[subQuestionIndex];
+		// 		if (element.answer && element.values) {
+		// 			for (let index = 0; index < element.values.length; index++) {
+		// 				const element2 = element.values[index];
+		// 				const chunkSize = 4;
+		// 				for (let i = 0; i < array.length; i += chunkSize) {
+		// 					const chunk = array.slice(i, i + chunkSize);
+		// 					if (chunk[index].localeCompare(element2) === 0) {
+		// 						console.log(chunk[index])
+		// 						console.log(element2)
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 	}
 	// jeżeli wszystko zawiedzie, wyświetla surową odpowiedź API
 	// uwaga. należy zwrócić uwagę na to, że apiResponseRaw nie jest tym samym co apiResponse. apiResponseRaw zawiera też informacje o typie zadania, ilości punktów, itp. nie koniecznie musi to interesować użytkownika.
