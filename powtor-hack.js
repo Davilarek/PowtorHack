@@ -154,6 +154,13 @@ function practicesHack() {
 					if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
 						console.log("Odnaleziono odpowiedź. ");
 						console.log(apiResponse[questionIndex].items);
+						for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
+							const element = apiResponse[questionIndex].items[subQuestionIndex];
+							if (element.answer && element.values) {
+								var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
+								console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
+							}
+						}
 						if (window.powtorHackDebug) console.log(apiResponseRaw);
 						console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
 						console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
@@ -329,7 +336,8 @@ function examsHack() {
 										for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
 											const element = apiResponse[questionIndex].items[subQuestionIndex];
 											if (element.answer && element.values) {
-												console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + element.values[element.answer]);
+												var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
+												console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
 											}
 										}
 										if (window.powtorHackDebug) console.log(apiResponseRaw);
