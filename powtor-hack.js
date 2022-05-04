@@ -110,74 +110,78 @@ function practicesHack() {
 					continue;
 				}
 
-				for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
-					var questionInfo = "";
-
-					// jest kilka typów zadań. te ify są potrzebne do znalezienia odpowiedniego typu zadania
-					if ("instruction" in apiResponse[questionIndex])
-						questionInfo = apiResponse[questionIndex].instruction;
-					if ("question" in apiResponse[questionIndex])
-						questionInfo = apiResponse[questionIndex].question;
-					if ("question" in apiResponse[questionIndex].items[0])
-						questionInfo = apiResponse[questionIndex].items[0].question;
-
-					var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
-
-					// rozwiązanie w komentarzu poniżej \/ jest bezpieczniejsze, ale nie zawsze działa
-					//var question = questionData[questionElements].childNodes[0];
-					var question = questionData[questionElements];
-					if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-					parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-					question.textContent = question.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-					parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-					question.textContent = question.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-
-					// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
-
-					if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-					// remove all newlines and carriage return from question.textContent and parsedQuestionData.textContent
-					question.textContent = question.textContent.replace(/\n/g, "").replace(/\r/g, "");
-					parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\n/g, "").replace(/\r/g, "");
-
-					// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
-
-					if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-					// replace ' ' with '' globally in question.textContent and parsedQuestionData.textContent
-					question.textContent = question.textContent.replace(/\s+/gm, '');
-					parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\s+/gm, '');
-
-					// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
-
-					if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-
-					// ostatnia część kodu. zamienia wszystkie znaki specjalne na ich odpowiedniki, upraszcza pytania do maksimum, a następnie porównuje dane z API z danymi ze strony. nie jest to dokładne rozwiązanie, ale czasem działa.
-					if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
-						console.log("Odnaleziono odpowiedź. ");
-						console.log(apiResponse[questionIndex].items);
-						for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
-							const element = apiResponse[questionIndex].items[subQuestionIndex];
-							if (element.answer && element.values) {
-								var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
-								console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
-							}
-						}
-						if (window.powtorHackDebug) console.log(apiResponseRaw);
-						console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
-						console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
-						return;
-					}
-				}
+				hackAnswersUsingJSON(apiResponse, apiResponseRaw, questionData, questionElements);
 			}
-
-			// jeżeli wszystko zawiedzie, wyświetla surową odpowiedź API
-			// uwaga. należy zwrócić uwagę na to, że apiResponseRaw nie jest tym samym co apiResponse. apiResponseRaw zawiera też informacje o typie zadania, ilości punktów, itp. nie koniecznie musi to interesować użytkownika.
-			console.log("UWAGA! Nie odnaleziono odpowiedzi. Możesz nadal spróbować odnaleźć je ręcznie. ");
-			console.log(apiResponse);
-			console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
-			console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
 		}
 	};
 	apiRequest.send();
+}
+
+function hackAnswersUsingJSON(apiResponse, apiResponseRaw, questionData, questionElements) {
+	for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
+		var questionInfo = "";
+
+		// jest kilka typów zadań. te ify są potrzebne do znalezienia odpowiedniego typu zadania
+		if ("instruction" in apiResponse[questionIndex])
+			questionInfo = apiResponse[questionIndex].instruction;
+		if ("question" in apiResponse[questionIndex])
+			questionInfo = apiResponse[questionIndex].question;
+		if ("question" in apiResponse[questionIndex].items[0])
+			questionInfo = apiResponse[questionIndex].items[0].question;
+
+		var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
+
+		// rozwiązanie w komentarzu poniżej \/ jest bezpieczniejsze, ale nie zawsze działa
+		//var question = questionData[questionElements].childNodes[0];
+		var question = questionData[questionElements];
+		if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
+		parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
+		question.textContent = question.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
+		parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
+		question.textContent = question.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
+
+		// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
+
+		if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
+		// remove all newlines and carriage return from question.textContent and parsedQuestionData.textContent
+		question.textContent = question.textContent.replace(/\n/g, "").replace(/\r/g, "");
+		parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\n/g, "").replace(/\r/g, "");
+
+		// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
+
+		if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
+		// replace ' ' with '' globally in question.textContent and parsedQuestionData.textContent
+		question.textContent = question.textContent.replace(/\s+/gm, '');
+		parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\s+/gm, '');
+
+		// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
+
+		if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
+
+		// ostatnia część kodu. zamienia wszystkie znaki specjalne na ich odpowiedniki, upraszcza pytania do maksimum, a następnie porównuje dane z API z danymi ze strony. nie jest to dokładne rozwiązanie, ale czasem działa.
+		if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
+			console.log("Odnaleziono odpowiedź. ");
+			console.log(apiResponse[questionIndex].items);
+			for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
+				const element = apiResponse[questionIndex].items[subQuestionIndex];
+				if (element.answer && element.values) {
+					var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
+					console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
+				}
+			}
+			if (window.powtorHackDebug) console.log(apiResponseRaw);
+			console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
+			console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
+			success = true;
+			return;
+		}
+	}
+	// jeżeli wszystko zawiedzie, wyświetla surową odpowiedź API
+	// uwaga. należy zwrócić uwagę na to, że apiResponseRaw nie jest tym samym co apiResponse. apiResponseRaw zawiera też informacje o typie zadania, ilości punktów, itp. nie koniecznie musi to interesować użytkownika.
+	console.log("UWAGA! Nie odnaleziono odpowiedzi. Możesz nadal spróbować odnaleźć je ręcznie. ");
+	console.log(apiResponse);
+	console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
+	console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
 }
 
 function examsHack() {
@@ -289,71 +293,9 @@ function examsHack() {
 									continue;
 								}
 
-								for (var questionIndex = 0; questionIndex < apiResponse.length; questionIndex++) {
-									var questionInfo = "";
-
-									// jest kilka typów zadań. te ify są potrzebne do znalezienia odpowiedniego typu zadania
-									if ("instruction" in apiResponse[questionIndex])
-										questionInfo = apiResponse[questionIndex].instruction;
-									if ("question" in apiResponse[questionIndex])
-										questionInfo = apiResponse[questionIndex].question;
-									if ("question" in apiResponse[questionIndex].items[0])
-										questionInfo = apiResponse[questionIndex].items[0].question;
-
-									var parsedQuestionData = new DOMParser().parseFromString(questionInfo, "text/html").documentElement;
-
-									// rozwiązanie w komentarzu poniżej \/ jest bezpieczniejsze, ale nie zawsze działa
-									//var question = questionData[questionElements].childNodes[0];
-									var question = questionData[questionElements];
-									if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-									parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-									question.textContent = question.textContent.replace(/\\\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-									parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-									question.textContent = question.textContent.replace(/\\frac{/g, "").replace(/}{/g, "").replace(/}/g, "");
-
-									// FIXME: uwaga. /\ niebezpieczne rozwiązanie.
-
-									if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-									// remove all newlines and carriage return from question.textContent and parsedQuestionData.textContent
-									question.textContent = question.textContent.replace(/\n/g, "").replace(/\r/g, "");
-									parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\n/g, "").replace(/\r/g, "");
-
-									// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
-
-									if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-									// replace ' ' with '' globally in question.textContent and parsedQuestionData.textContent
-									question.textContent = question.textContent.replace(/\s+/gm, '');
-									parsedQuestionData.textContent = parsedQuestionData.textContent.replace(/\s+/gm, '');
-
-									// FIXME: uwaga. /\ (potencjalnie) niebezpieczne rozwiązanie.
-
-									if (window.powtorHackDebug) console.log("parsedQuestionData: " + parsedQuestionData.textContent + "\nquestion: " + question.textContent);
-
-									// ostatnia część kodu. zamienia wszystkie znaki specjalne na ich odpowiedniki, upraszcza pytania do maksimum, a następnie porównuje dane z API z danymi ze strony. nie jest to dokładne rozwiązanie, ale czasem działa.
-									if (question.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-").localeCompare(parsedQuestionData.textContent.replace(/\n*$/, "").normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/(\u2212)/gim, "-")) === 0) {
-										console.log("Odnaleziono odpowiedź. ");
-										console.log(apiResponse[questionIndex].items);
-										for (let subQuestionIndex = 0; subQuestionIndex < apiResponse[questionIndex].items.length; subQuestionIndex++) {
-											const element = apiResponse[questionIndex].items[subQuestionIndex];
-											if (element.answer && element.values) {
-												var parsedSubQuestionData = new DOMParser().parseFromString(element.values[element.answer], "text/html").documentElement;
-												console.log(`Sugestia odpowiedzi w pod-zadaniu ${subQuestionIndex + 1}: ` + parsedSubQuestionData.textContent);
-											}
-										}
-										if (window.powtorHackDebug) console.log(apiResponseRaw);
-										console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
-										console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
-										return;
-									}
-								}
+								hackAnswersUsingJSON(apiResponse, apiResponseRaw, questionData, questionElements);
 							}
 
-							// jeżeli wszystko zawiedzie, wyświetla surową odpowiedź API
-							// uwaga. należy zwrócić uwagę na to, że apiResponseRaw nie jest tym samym co apiResponse. apiResponseRaw zawiera też informacje o typie zadania, ilości punktów, itp. nie koniecznie musi to interesować użytkownika.
-							console.log("UWAGA! Nie odnaleziono odpowiedzi. Możesz nadal spróbować odnaleźć je ręcznie. ");
-							console.log(apiResponse);
-							console.log("Operacja ukończona w " + (performance.now() - cheatStartTime) + "ms.");
-							console.log("Uzyskano odpowiedzi w " + (performance.now() - answersGetTime) + "ms.");
 						}
 					};
 					apiRequest.send();
